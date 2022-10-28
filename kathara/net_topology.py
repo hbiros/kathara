@@ -1,5 +1,7 @@
 import ipaddress
 import numpy
+import os
+from datetime import date
 from getkey import getkey
 
 def create_adj_matrix():
@@ -62,7 +64,7 @@ def addresses_setup(adj_matrix, dev_names):
                             break
                     else:
                         ip_pool = get_ip("Specified network already exists")
-
+    return ip_pools
 
 def get_ip(text=None):
     if text:
@@ -79,3 +81,36 @@ def get_ip(text=None):
                 continue
             else:
                 return ip_pool.with_prefixlen
+
+def create_lab_config(ip_pools, adj_matrix, dev_names):
+    if os.path.exists('lab.conf'):
+        print("File lab.conf already exists."
+        "Are you sure you want to overwrite it?")
+        ans = input("y/n: ").upper()
+        if ans != 'Y':
+            return -1
+    with open('lab.conf', 'w') as f:
+        f.write("# DATE: {}\n".format(date.today()))
+        f.write("LAB_NAME=\"{}\"\n".format('Example'))
+        f.write("LAB_DESCRIPTION=\"{}\"\n".format('Example description'))
+        f.write("LAB_VERSION={}\n".format('1.0'))
+        f.write("LAB_AUTHOR={}\n".format('test'))
+        f.write("LAB_EMAIL={}\n\n".format('test@test.com'))
+        dev_count = len(dev_names)   
+        net_count = len(ip_pools)
+        net_names = [chr(65 + i) for i in range(0, net_count)]
+        net_names.reverse()
+        for i in range(0, dev_count-1):
+            int_num=0
+            # row = adj_matrix[i,:]
+            row=adj_matrix[i,:].tolist()
+            for j in range(i+1, dev_count):
+                if row[j] == 1:
+                    col=adj_matrix[:,j].tolist()
+                    f.write('{0}[{1}]={2}\n'.format(dev_names[i], 
+                                                row[0:j].count(1), 
+                                                net_names[-1]))
+                    f.write('{0}[{1}]={2}\n\n'.format(dev_names[j], 
+                                                col[0:i].count(1), 
+                                                net_names.pop()))
+
