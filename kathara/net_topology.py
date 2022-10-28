@@ -7,8 +7,8 @@ from getkey import getkey
 def create_adj_matrix():
     router_num = int(input("How many routers are needed?: "))
     pc_num = int(input("How many PCs are needed?: "))
-    router_names = ["R"+str(i) for i in range(0,router_num)]
-    pc_names = ["PC"+str(i) for i in range(0,pc_num)]
+    router_names = ["r"+str(i) for i in range(0,router_num)]
+    pc_names = ["pc"+str(i) for i in range(0,pc_num)]
     dev_names = router_names + pc_names
     matrix_len = router_num + pc_num
     adj_matrix = numpy.zeros((matrix_len, matrix_len), dtype=int)
@@ -139,13 +139,3 @@ def create_lab_startups(ip_pools, adj_matrix, dev_names):
                                                         next(ip_addr, 1),
                                                         ip_netmask
                     ))
-
-
-                # col=adj_matrix[:,j].tolist()
-                # f.write('{0}[{1}]={2}\n'.format(dev_names[i], 
-                #                             , 
-                #                             net_names[-1]))
-                # f.write('{0}[{1}]={2}\n\n'.format(dev_names[j], 
-                #                             col[0:i].count(1), 
-                #                             net_names.pop()))
-                # second_dev_name=dev_names[j]
