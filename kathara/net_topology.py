@@ -108,9 +108,44 @@ def create_lab_config(ip_pools, adj_matrix, dev_names):
                 if row[j] == 1:
                     col=adj_matrix[:,j].tolist()
                     f.write('{0}[{1}]={2}\n'.format(dev_names[i], 
-                                                row[0:j].count(1), 
-                                                net_names[-1]))
+                                                        row[0:j].count(1), 
+                                                        net_names[-1]))
                     f.write('{0}[{1}]={2}\n\n'.format(dev_names[j], 
-                                                col[0:i].count(1), 
-                                                net_names.pop()))
+                                                        col[0:i].count(1), 
+                                                        net_names.pop()))
 
+def create_lab_startups(ip_pools, adj_matrix, dev_names):
+    ip_pools.reverse()
+    dev_count = len(dev_names)   
+    # net_count = len(ip_pools)
+    for i in range(0, dev_count-1):
+        row=adj_matrix[i,:].tolist()
+        for j in range(i+1, dev_count):
+            if row[j] == 1:
+                ip=ip_pools.pop()
+                ip_addr=ip.hosts()
+                ip_netmask=ip.netmask
+                startup_file="{0}.{1}".format(dev_names[i],"startup")
+                with open(startup_file, 'a') as f:
+                    f.write('ifconfig eth{0} {1} netmask {2} up\n'.format(
+                                                        row[0:j].count(1),
+                                                        next(ip_addr, 1),
+                                                        ip_netmask
+                    ))
+                startup_file="{0}.{1}".format(dev_names[j],"startup")
+                with open(startup_file, 'a') as f:
+                    f.write('ifconfig eth{0} {1} netmask {2} up\n'.format(
+                                                        row[0:i].count(1),
+                                                        next(ip_addr, 1),
+                                                        ip_netmask
+                    ))
+
+
+                # col=adj_matrix[:,j].tolist()
+                # f.write('{0}[{1}]={2}\n'.format(dev_names[i], 
+                #                             , 
+                #                             net_names[-1]))
+                # f.write('{0}[{1}]={2}\n\n'.format(dev_names[j], 
+                #                             col[0:i].count(1), 
+                #                             net_names.pop()))
+                # second_dev_name=dev_names[j]
