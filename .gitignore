@@ -30,3 +30,4 @@ share/python-wheels/
 MANIFEST
 
 kathara/app.py
+kathara/__pycache__/

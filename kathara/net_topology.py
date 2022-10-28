@@ -1,3 +1,4 @@
+import ipaddress
 import numpy
 from getkey import getkey
 
@@ -35,4 +36,46 @@ def create_adj_matrix():
             col+=1
         print()
         row+=1
-    return adj_matrix
+    return adj_matrix, dev_names
+
+def addresses_setup(adj_matrix, dev_names):
+    size = len(dev_names)
+    ip_pools = list()
+    if adj_matrix.size == 0:
+        return       
+    for i in range(0, size-1):
+        row = adj_matrix[i,:]
+        for j in range(i+1, size):
+            if row[j] == 1:
+                ip_pool = get_ip('IP pool for devices '+dev_names[i]+'--'
+                                        +dev_names[j])
+                while True:        
+                    if ip_pool not in [ip.with_prefixlen for ip in ip_pools]:
+                        try:
+                            ip_addr = ipaddress.IPv4Network(ip_pool)
+                        except Exception as e:
+                            print(e)
+                            ip_pool = input('\n')
+                            continue
+                        else:
+                            ip_pools.append(ip_addr)
+                            break
+                    else:
+                        ip_pool = get_ip("Specified network already exists")
+
+
+def get_ip(text=None):
+    if text:
+        print(text)
+    while True:
+        try:
+            ip_pool = ipaddress.ip_network(input())
+        except Exception as e:
+            print(e)
+        else:
+            if ip_pool.prefixlen > 30:
+                print("You shall specify network with mask of " 
+                                        "maximum length of 30")
+                continue
+            else:
+                return ip_pool.with_prefixlen
