@@ -3,6 +3,7 @@ import numpy
 import os
 from datetime import date
 from getkey import getkey
+from banner import print_menu
 
 def create_adj_matrix():
     router_num = int(input("How many routers are needed?: "))
@@ -139,3 +140,38 @@ def create_lab_startups(ip_pools, adj_matrix, dev_names):
                                                         next(ip_addr, 1),
                                                         ip_netmask
                     ))
+
+def create_device_configs(dev_names):
+    choices = print_menu("Select daemons to enable",
+                ["ospfd", "ospf6d", "ripd", "ripngd", "bgpd", "isisd"])
+    daemons = ['ospfd', 'ospf6d', 'ripd', 'ripngd', 'bgpd', 'isisd']
+    pwd = os.getcwd()
+    for dev_name in dev_names:
+        os.chdir(pwd)
+        if dev_name[0] == "r":
+            dirs = os.path.join(dev_name, 'etc', 'quagga')
+            os.makedirs(dirs)
+            os.chdir(dirs)
+            with open('daemons', 'w') as f:
+                f.write("zebra=yes\n")
+                for daemon in daemons:
+                    if (daemons.index(daemon)+1) in choices:
+                        f.write("{}=yes\n".format(daemon))
+                    else:
+                        f.write("{}=no\n".format(daemon))
+            for daemon in daemons:
+                if (daemons.index(daemon)+1) in choices:
+                    with open('{}.conf'.format(daemon), 'w') as f:
+                        f.write('!\n')
+                        f.write('hostname {}\n'.format(daemon))
+                        f.write('password zebra\n')
+                        f.write('enable password zebra\n')
+                        f.write('log file /var/log/zebra/{}.log\n'.format(daemon))
+                        f.write('!\n')
+            with open('zebra.conf', 'w') as f:
+                f.write('!\n')
+                f.write('hostname {}\n'.format(dev_name))
+                f.write('password zebra\n')
+                f.write('enable password zebra\n')
+                f.write('!\n')
+
