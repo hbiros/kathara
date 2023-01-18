@@ -29,5 +29,5 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-kathara/app.py
+# kathara/app.py
 kathara/__pycache__/
